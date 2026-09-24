@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Ludi Design — Cyrielle Lüdi, graphiste</title>
+<meta name="description" content="Portfolio de Cyrielle Lüdi, graphiste spécialisée en identité visuelle, édition, affiche et packaging. Basée en Suisse.">
+<link rel="icon" href="assets/logo.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&amp;family=Instrument+Sans:ital,wght@0,400..700;1,400..700&amp;display=swap" rel="stylesheet">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+<!-- ── Accueil ─────────────────────────────────────────────────────────── -->
+<section class="view view--home" id="view-home" hidden>
+  <div class="home__visual">
+    <a class="logo logo--home" href="#/" aria-label="Ludi Design — accueil">
+      <img src="assets/logo.svg" alt="" width="47" height="72">
+    </a>
+    <!-- Le visuel du projet actif est inséré par app.js -->
+  </div>
+
+  <div class="home__panel">
+    <nav class="nav anim" style="--step:0" aria-label="Principale">
+      <a class="nav__link" href="#/portfolio">Portfolio</a>
+      <a class="nav__link" href="#/a-propos">À propos</a>
+      <a class="nav__link" href="#/contact">Contact</a>
+    </nav>
+    <h1 class="visually-hidden">Portfolio</h1>
+    <div class="carousel">
+      <ul class="projects" id="projects"></ul>
+    </div>
+  </div>
+</section>
+
+<!-- ── Pages intérieures ───────────────────────────────────────────────── -->
+<div class="page" id="pages" hidden>
+  <header class="page__header">
+    <a class="logo" href="#/" aria-label="Ludi Design — accueil">
+      <img src="assets/logo.svg" alt="" width="47" height="72">
+    </a>
+    <nav class="nav" aria-label="Principale">
+      <a class="nav__link" href="#/portfolio">Portfolio</a>
+      <a class="nav__link" href="#/a-propos">À propos</a>
+      <a class="nav__link" href="#/contact">Contact</a>
+    </nav>
+  </header>
+
+  <!-- Portfolio : galerie de tous les projets, remplie par app.js -->
+  <section class="view gallery" id="view-portfolio" hidden>
+    <h1 class="visually-hidden" tabindex="-1">Portfolio</h1>
+    <ul class="gallery__grid" id="gallery" role="list"></ul>
+  </section>
+
+  <!-- Projet -->
+  <section class="view project" id="view-project" hidden>
+    <a class="back" id="back" href="#/" aria-label="Retour à l'accueil">
+      <span class="chevron chevron--left"></span>
+    </a>
+
+    <div class="project__body">
+      <header class="detail__head anim" style="--step:0">
+        <h1 class="detail__name" id="p-name" tabindex="-1"></h1>
+        <p class="detail__meta" id="p-meta"></p>
+      </header>
+
+      <div class="detail__visual anim" style="--step:1" id="p-visual">
+        <!-- Série de visuels, remplie par app.js -->
+        <div class="shots" id="p-shots" hidden></div>
+        <!-- Visuel unique, rempli par app.js -->
+        <div id="p-cover" hidden></div>
+      </div>
+
+      <div class="detail__text anim" style="--step:2">
+        <p class="detail__desc" id="p-desc"></p>
+        <div class="detail__typo">
+          <div>Typographie</div>
+          <div class="detail__typo-value" id="p-typo"></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- À propos -->
+  <section class="view simple" id="view-about" hidden>
+    <h1 class="anim" style="--step:0" tabindex="-1">À propos</h1>
+    <p class="anim" style="--step:1">Cyrielle Lüdi — graphiste spécialisée en identité visuelle, édition, affiche et packaging. Basée en Suisse, je conçois des identités simples, ludiques et soignées pour des marques, des festivals et des projets culturels.</p>
+  </section>
+
+  <!-- Contact -->
+  <section class="view simple" id="view-contact" hidden>
+    <h1 class="anim" style="--step:0" tabindex="-1">Contact</h1>
+    <p class="anim" style="--step:1">Un projet, une collaboration&nbsp;?</p>
+    <a class="mail anim" style="--step:2" href="mailto:bonjour@ludidesign.ch">bonjour@ludidesign.ch</a>
+  </section>
+</div>
+
+<script src="app.js"></script>
+</body>
+</html>

@@ -1,0 +1,7 @@
+# Cache de l'outil de contrôle de design
+.impeccable/
+
+# Fichiers système
+Thumbs.db
+desktop.ini
+.DS_Store

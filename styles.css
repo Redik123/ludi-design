@@ -1,0 +1,723 @@
+/* ── Ludi Design ─────────────────────────────────────────────────────────
+   Portfolio de Cyrielle Lüdi.
+
+   Trois mises en page :
+     > 1080px   accueil en deux panneaux, page projet en grille
+     ≤ 1280px   accueil à parts égales, pour la place des titres
+     ≤ 1080px   colonne unique, le visuel remonte sous le titre
+     ≤ 860px    version mobile : plus de survol, chaque projet devient
+                une carte avec sa propre image
+   ───────────────────────────────────────────────────────────────────── */
+
+:root {
+  --cream: #FFF3D9;
+  --white: #ffffff;
+  --ink: #1d1d1b;
+  --gold: #8a7a4f;
+  --muted: #8f8f8a;
+  --muted-strong: #6f6f6a;
+
+  --sans: 'Instrument Sans', Helvetica, Arial, sans-serif;
+  --serif: 'Instrument Serif', Georgia, serif;
+
+  --page-pad-x: 44px;
+  --item-h: 56px;
+
+  /* Taille des titres du carrousel, au repos et au centre (lue aussi par
+     app.js pour réduire les titres trop longs). */
+  --title: 19px;
+  --title-active: 22px;
+
+  --ease-out: cubic-bezier(.22, .61, .36, 1);
+}
+
+*, *::before, *::after { box-sizing: border-box; }
+
+/* Les règles `display` ci-dessous l'emportent sur le style par défaut de
+   [hidden] : on le rétablit pour que le routage puisse masquer les vues. */
+[hidden] { display: none !important; }
+
+body {
+  margin: 0;
+  font-family: var(--sans);
+  color: var(--ink);
+  background: var(--cream);
+  -webkit-font-smoothing: antialiased;
+  overflow-x: hidden; /* les vues entrent en glissant depuis les côtés */
+}
+
+a { color: inherit; text-decoration: none; }
+a:hover { color: var(--gold); }
+
+img { max-width: 100%; }
+
+ul { list-style: none; margin: 0; padding: 0; }
+
+.visually-hidden {
+  position: absolute;
+  width: 1px; height: 1px;
+  margin: -1px; padding: 0;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+:focus-visible {
+  outline: 2px solid var(--gold);
+  outline-offset: 3px;
+  border-radius: 2px;
+}
+
+/* ── Marque ──────────────────────────────────────────────────────────── */
+
+.logo { display: block; user-select: none; }
+.logo img { height: 72px; width: auto; display: block; }
+.logo:hover { opacity: .7; }
+
+/* ── Navigation ──────────────────────────────────────────────────────── */
+
+.nav {
+  display: flex;
+  gap: 56px;
+  font-size: 11px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+}
+
+.nav__link { white-space: nowrap; }
+.nav__link[aria-current] { font-weight: 600; }
+
+/* ── Accueil ─────────────────────────────────────────────────────────── */
+
+.view--home { display: flex; min-height: 100vh; }
+
+.home__visual {
+  flex: 1.15;
+  min-width: 0;
+  background: var(--cream);
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 96px 48px 48px;
+}
+
+.logo--home { position: absolute; top: 28px; left: var(--page-pad-x); }
+
+/* Jamais plus haut que l'écran : l'accueil tient sans défiler, la molette
+   reste libre pour le carrousel. */
+.home__hero {
+  width: 100%;
+  height: min(76vh, calc(100vh - 144px));
+  object-fit: contain;
+  object-position: center;
+  transition: opacity .35s ease;
+}
+
+.home__hero.is-swapping { opacity: 0; }
+
+.home__panel {
+  flex: 1;
+  min-width: 0;
+  background: var(--white);
+  display: flex;
+  flex-direction: column;
+  padding: 40px 64px 56px;
+}
+
+.home__panel .nav { justify-content: flex-end; }
+
+/* ── Carrousel des projets ───────────────────────────────────────────────
+   Le projet sélectionné reste au centre ; la liste boucle et s'estompe
+   vers les bords. Hauteur d'entrée fixe : le pas de défilement ne change
+   pas quand le titre actif grossit.
+   ───────────────────────────────────────────────────────────────────── */
+
+.carousel {
+  flex: 1;
+  min-height: 0;
+  width: 100%;
+  max-width: 480px;
+  margin: 0 auto;
+  container-type: size;
+}
+
+.projects {
+  --reach: 5.5;  /* rayon visible, en entrées (ajusté par app.js) */
+  --solid: 3;    /* rayon pleinement opaque */
+  --fade: linear-gradient(to bottom,
+    transparent calc(50% - var(--reach) * var(--item-h)),
+    #000 calc(50% - var(--solid) * var(--item-h)),
+    #000 calc(50% + var(--solid) * var(--item-h)),
+    transparent calc(50% + var(--reach) * var(--item-h)));
+
+  position: relative;
+  height: 100%;
+  /* Marge sur les côtés, compensée : la flèche qui avance au survol et
+     le contour de focus ne sont plus rognés par le bord de la liste. */
+  margin-inline: -12px;
+  padding-inline: 12px;
+  overflow-x: hidden;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  scroll-snap-type: y mandatory;
+  scrollbar-width: none;
+  padding-block: calc(50cqh - var(--item-h) / 2);
+  -webkit-mask-image: var(--fade);
+  mask-image: var(--fade);
+}
+
+.projects::-webkit-scrollbar { display: none; }
+
+.projects li {
+  height: var(--item-h);
+  display: flex;
+  align-items: center;
+  scroll-snap-align: center;
+}
+
+.projects li > .project-link { flex: 1; min-width: 0; }
+
+/* Entrées hors de vue : inutile de les animer. */
+.projects li.is-far { animation: none; }
+
+.project-link {
+  display: flex;
+  align-items: center;
+  gap: 28px;
+  cursor: pointer;
+}
+
+.project-link__text { min-width: 0; }
+
+/* Une seule ligne, toujours : un titre sur deux lignes casserait le pas
+   régulier du carrousel. --fit (réglé par app.js) réduit juste assez les
+   titres trop longs pour la colonne. */
+.project-link__name {
+  font-size: calc(var(--title) * var(--fit, 1));
+  font-weight: 400;
+  line-height: 1.1;
+  white-space: nowrap;
+  text-wrap: balance;
+  transition: font-size .2s ease;
+}
+
+.project-link__meta {
+  font-size: 11px;
+  color: var(--muted);
+  margin-top: 3px;
+  white-space: nowrap;
+}
+
+.projects li.is-active .project-link__name {
+  font-size: calc(var(--title-active) * var(--fit, 1));
+  font-weight: 700;
+  font-style: italic;
+}
+
+/* La vignette ne sert qu'à la version mobile. */
+.project-link__thumb { display: none; }
+
+.project-link__go {
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  background: var(--ink);
+  display: none;
+  align-items: center;
+  justify-content: center;
+  flex: none;
+  transition: transform .25s var(--ease-out), background-color .2s ease;
+}
+
+.projects li.is-active .project-link__go { display: flex; }
+.project-link:hover .project-link__go {
+  background: var(--gold);
+  transform: translateX(4px);
+}
+
+/* Chevrons dessinés en CSS */
+.chevron {
+  width: 9px;
+  height: 9px;
+  border-top: 1.6px solid #fff;
+  border-right: 1.6px solid #fff;
+  transform: rotate(45deg);
+  margin-left: -3px;
+}
+
+.chevron--left {
+  border-right: 0;
+  border-left: 1.6px solid #fff;
+  transform: rotate(-45deg);
+  margin-left: 3px;
+}
+
+/* ── Pages intérieures ───────────────────────────────────────────────── */
+
+.page {
+  min-height: 100vh;
+  background: var(--cream);
+  padding: 28px var(--page-pad-x) 72px;
+}
+
+.page__header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 24px;
+}
+
+.page__header .nav { padding-top: 14px; }
+
+/* ── Projet ──────────────────────────────────────────────────────────── */
+
+.project {
+  display: flex;
+  gap: 40px;
+  margin-top: 56px;
+  align-items: flex-start;
+}
+
+.back {
+  width: 46px;
+  height: 46px;
+  border-radius: 50%;
+  background: var(--ink);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex: none;
+  margin-top: 8px;
+  transition: transform .25s var(--ease-out), background-color .2s ease;
+}
+
+.back:hover {
+  background: var(--gold);
+  transform: translateX(-4px);
+}
+
+.project__body {
+  flex: 1;
+  min-width: 0;
+  display: grid;
+  grid-template-columns: minmax(320px, 440px) 1fr;
+  grid-template-areas:
+    "head visual"
+    "text visual";
+  column-gap: 72px;
+  align-items: start;
+}
+
+.detail__head   { grid-area: head; }
+.detail__text   { grid-area: text; }
+.detail__visual { grid-area: visual; }
+
+.detail__name {
+  font-size: 44px;
+  font-weight: 600;
+  line-height: 1.05;
+  margin: 0;
+}
+
+.detail__meta {
+  font-size: 12px;
+  color: var(--muted);
+  margin: 8px 0 0;
+}
+
+.detail__desc {
+  font-size: 15px;
+  line-height: 1.55;
+  margin: 96px 0 0;
+  max-width: 420px;
+  text-wrap: pretty;
+}
+
+.detail__typo {
+  margin-top: 56px;
+  font-size: 14px;
+  line-height: 1.6;
+}
+
+.detail__typo-value { color: var(--muted-strong); }
+
+/* Visuels */
+.shots {
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+  gap: 28px;
+}
+
+.shots img { width: 100%; height: auto; }
+.shots__main { align-self: center; }
+
+.shots__wide {
+  grid-column: 1 / -1;
+  width: 88%;
+  justify-self: center;
+}
+
+.cover {
+  display: block;
+  width: 100%;
+  height: 72vh;
+  object-fit: contain;
+  object-position: center top;
+}
+
+/* ── À propos / Contact ──────────────────────────────────────────────── */
+
+.simple {
+  max-width: 620px;
+  margin: 120px auto 0;
+}
+
+.simple h1 {
+  font-size: 44px;
+  font-weight: 600;
+  margin: 0;
+}
+
+.simple p {
+  font-size: 16px;
+  line-height: 1.6;
+  margin: 32px 0 0;
+  text-wrap: pretty;
+}
+
+.mail {
+  font-family: var(--serif);
+  font-style: italic;
+  font-size: 30px;
+  display: inline-block;
+  margin-top: 12px;
+}
+
+/* ── Portfolio : la galerie ──────────────────────────────────────────────
+   Mosaïque sur fond blanc, chaque projet posé sur une vignette crème. Les
+   colonnes sont décalées : app.js donne à chaque vignette sa hauteur en
+   rangées de 1px, et la grille la range dans la colonne la plus courte.
+   ───────────────────────────────────────────────────────────────────── */
+
+.page.is-white { background: var(--white); }
+
+.gallery { margin-top: 56px; }
+
+.gallery__grid {
+  --cols: 4;
+  --gap: 12px;
+
+  display: grid;
+  grid-template-columns: repeat(var(--cols), minmax(0, 1fr));
+  grid-auto-rows: 1px;
+  grid-auto-flow: row dense;
+  column-gap: var(--gap);
+}
+
+.gallery__grid .anim { animation-delay: calc(var(--step, 0) * 45ms); }
+
+.tile { align-self: start; }
+
+.tile__link {
+  position: relative;
+  display: block;
+}
+
+.tile__frame {
+  background: var(--cream);
+  padding: 9%;
+  overflow: hidden;
+}
+
+.tile__img {
+  display: block;
+  width: 100%;
+  height: auto;
+  opacity: 0;
+  transition: opacity .5s ease, transform .7s var(--ease-out);
+}
+
+.tile__img.is-loaded { opacity: 1; }
+
+/* Au doigt, le titre est affiché sous la vignette. */
+.tile__caption {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 10px 2px 0;
+}
+
+.tile__name {
+  display: block;
+  font-size: 14px;
+  line-height: 1.2;
+}
+
+.tile__meta {
+  display: block;
+  font-size: 11px;
+  color: var(--muted);
+  margin-top: 3px;
+}
+
+.tile__go { display: none; }
+
+/* À la souris : l'image seule, comme dans une planche ; le titre et la
+   flèche apparaissent au survol. */
+@media (hover: hover) {
+  .tile__caption {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    padding: 40px 14px 14px;
+    background: linear-gradient(to top, var(--cream) 50%, rgba(255, 243, 217, 0));
+    opacity: 0;
+    transform: translateY(6px);
+    transition: opacity .3s ease, transform .35s var(--ease-out);
+  }
+
+  .tile__name {
+    font-size: 16px;
+    font-weight: 700;
+    font-style: italic;
+  }
+
+  .tile__go {
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    background: var(--ink);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex: none;
+  }
+
+  .tile__go .chevron {
+    width: 7px;
+    height: 7px;
+    margin-left: -2px;
+  }
+
+  .tile__link:hover { color: inherit; }
+  .tile__link:hover .tile__img { transform: scale(1.04); }
+
+  .tile__link:hover .tile__caption,
+  .tile__link:focus-visible .tile__caption {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@media (min-width: 1680px) { .gallery__grid { --cols: 5; } }
+@media (max-width: 1180px) { .gallery__grid { --cols: 3; } }
+
+/* ── Entrées animées ─────────────────────────────────────────────────────
+   La direction vient de [data-dir] posé sur <body> par app.js : on avance
+   vers une page (glissé depuis la droite), on revient à l'accueil (glissé
+   depuis la gauche), ou c'est le tout premier affichage (montée simple).
+   ───────────────────────────────────────────────────────────────────── */
+
+@keyframes ldFromRight {
+  from { opacity: 0; transform: translate3d(40px, 0, 0); }
+  to   { opacity: 1; transform: none; }
+}
+
+@keyframes ldFromLeft {
+  from { opacity: 0; transform: translate3d(-40px, 0, 0); }
+  to   { opacity: 1; transform: none; }
+}
+
+@keyframes ldRise {
+  from { opacity: 0; transform: translate3d(0, 16px, 0); }
+  to   { opacity: 1; transform: none; }
+}
+
+/* `backwards` et non `both` : une fois l'animation finie l'élément reprend
+   ses styles normaux, sinon l'opacité figée casserait le fondu du visuel. */
+.anim {
+  animation: ldFromRight .55s var(--ease-out) backwards;
+  animation-delay: calc(var(--step, 0) * 80ms);
+}
+
+[data-dir="back"] .anim  { animation-name: ldFromLeft; }
+[data-dir="first"] .anim { animation-name: ldRise; }
+
+/* La liste compte onze entrées : décalage plus serré. */
+.projects .anim { animation-delay: calc(var(--step, 0) * 40ms); }
+
+/* ── ≤ 1280px : accueil à parts égales ───────────────────────────────────
+   Sur un écran d'ordinateur étroit, la liste gagne de la place pour que
+   les titres longs restent lisibles sur une ligne.
+   ───────────────────────────────────────────────────────────────────── */
+
+@media (max-width: 1280px) {
+  .home__visual { flex: 1; }
+  .home__panel { padding-inline: 40px; }
+}
+
+/* ── ≤ 1080px : colonne unique ───────────────────────────────────────── */
+
+@media (max-width: 1080px) {
+  .project__body {
+    display: flex;
+    flex-direction: column;
+    gap: 32px;
+  }
+
+  .detail__head   { order: 1; }
+  .detail__visual { order: 2; }
+  .detail__text   { order: 3; }
+
+  .detail__desc { margin-top: 0; }
+  .detail__typo { margin-top: 32px; }
+
+  .cover { height: auto; max-height: 68vh; }
+}
+
+/* ── ≤ 860px : version mobile ────────────────────────────────────────────
+   Sans survol, le grand visuel d'accueil ne peut plus changer : on le
+   remplace par une liste de cartes, chaque projet montrant son image.
+   ───────────────────────────────────────────────────────────────────── */
+
+@media (max-width: 860px) {
+  :root { --page-pad-x: 22px; }
+
+  .logo img { height: 58px; }
+
+  /* Accueil : plus de split, tout est sur le fond crème. */
+  .view--home { flex-direction: column; }
+
+  .home__visual {
+    flex: none;
+    display: block;
+    padding: 22px var(--page-pad-x) 0;
+    position: static;
+  }
+
+  .logo--home { position: static; }
+  .home__hero { display: none; }
+
+  .home__panel {
+    flex: 1;
+    background: var(--cream);
+    padding: 18px var(--page-pad-x) 72px;
+  }
+
+  .home__panel .nav { justify-content: flex-start; }
+
+  /* Pas de carrousel au doigt : une simple liste qui défile avec la page. */
+  .carousel {
+    flex: none;
+    max-width: none;
+    container-type: normal;
+  }
+
+  .projects {
+    display: flex;
+    flex-direction: column;
+    gap: 46px;
+    height: auto;
+    overflow: visible;
+    scroll-snap-type: none;
+    margin-inline: 0;
+    padding: 34px 0 0;
+    -webkit-mask-image: none;
+    mask-image: none;
+  }
+
+  .projects li {
+    display: block;
+    height: auto;
+    scroll-snap-align: none;
+  }
+
+  .projects li.is-clone { display: none; }
+
+  /* Chaque projet devient une carte : image, puis titre. */
+  .project-link {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 14px;
+  }
+
+  .project-link__thumb {
+    display: block;
+    width: 100%;
+    height: auto;
+  }
+
+  /* Le survol n'existe pas : ni italique d'état actif, ni flèche. */
+  .projects li.is-active .project-link__name {
+    font-size: 21px;
+    font-weight: 400;
+    font-style: normal;
+  }
+
+  .project-link__name {
+    font-size: 21px;
+    white-space: normal;
+  }
+  .project-link__meta { font-size: 12px; margin-top: 5px; }
+  .projects li.is-active .project-link__go { display: none; }
+
+  /* Cibles tactiles confortables. */
+  .nav {
+    gap: 26px;
+    font-size: 12px;
+  }
+  .nav__link { padding: 10px 0; }
+
+  /* Pages intérieures */
+  .page { padding: 22px var(--page-pad-x) 64px; }
+
+  .page__header {
+    flex-direction: column;
+    gap: 14px;
+  }
+  .page__header .nav { padding-top: 0; }
+
+  .project { gap: 18px; margin-top: 28px; }
+
+  .gallery { margin-top: 28px; }
+  .gallery__grid { --cols: 2; --gap: 10px; }
+
+  .back {
+    width: 42px;
+    height: 42px;
+    margin-top: 4px;
+  }
+
+  .detail__name { font-size: 32px; }
+  .simple h1 { font-size: 32px; }
+  .simple { margin-top: 56px; }
+
+  .shots { gap: 20px; }
+  .shots__wide { width: 100%; }
+}
+
+@media (max-width: 520px) {
+  .shots { grid-template-columns: 1fr; }
+  .shots__main { align-self: stretch; }
+  .mail { font-size: 25px; }
+}
+
+/* ── Mouvement réduit ────────────────────────────────────────────────── */
+
+@media (prefers-reduced-motion: reduce) {
+  .anim {
+    animation: none;
+  }
+  .home__hero,
+  .project-link__name,
+  .project-link__go,
+  .back,
+  .tile__img,
+  .tile__caption {
+    transition: none;
+  }
+  .tile__link:hover .tile__img { transform: none; }
+}
